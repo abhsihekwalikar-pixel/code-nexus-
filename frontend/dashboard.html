@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - UserHub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">User<span class="highlight">Hub</span></div>
+        <div class="nav-user">
+            <span id="navUserName">Welcome</span>
+            <span id="navUserRole" class="role-badge">User</span>
+            <button onclick="logout()" class="btn-logout">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Admin View -->
+        <div id="adminView" class="view-section hidden">
+            <div class="header">
+                <div>
+                    <h2>User Management</h2>
+                    <p class="text-muted">Manage all users and their permissions</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
+                        <span>🔍</span>
+                    </div>
+                    <button onclick="openAddUserModal()" class="btn-primary btn-sm">+ Add User</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span id="statTotal">0</span>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat-card">
+                    <span id="statAdmins">0</span>
+                    <p>Admins</p>
+                </div>
+                <div class="stat-card">
+                    <span id="statUsers">0</span>
+                    <p>Regular Users</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr class="loading-row">
+                            <td colspan="6" class="text-center">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state hidden">
+                    <p>No users found</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- User View -->
+        <div id="userView" class="view-section hidden">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">U</div>
+                    <h2 id="profileNameDisplay">User Profile</h2>
+                    <span id="profileRoleDisplay" class="role-badge">User</span>
+                </div>
+
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3>Personal Information</h3>
+                        <button onclick="openEditProfileModal()" class="btn-outline btn-sm">Edit Profile</button>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <span class="label">Full Name</span>
+                            <span id="profileName" class="value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Email Address</span>
+                            <span id="profileEmail" class="value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Role</span>
+                            <span id="profileRole" class="value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Member Since</span>
+                            <span id="profileCreatedAt" class="value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3>Security</h3>
+                        <button onclick="openChangePasswordModal()" class="btn-outline btn-sm">Change Password</button>
+                    </div>
+                    <div class="security-info">
+                        <p class="text-muted">Last password change: <span id="lastPasswordChange">Recently</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal (Admin) -->
+    <div id="editUserModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button onclick="closeModal('editUserModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="input-group">
+                    <input type="text" id="editName" required>
+                    <label>Full Name</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="editEmail" required>
+                    <label>Email</label>
+                </div>
+                <div class="input-group">
+                    <select id="editRole" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('editUserModal')" class="btn-outline">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal (User) -->
+    <div id="editProfileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button onclick="closeModal('editProfileModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="editProfileForm">
+                <div class="input-group">
+                    <input type="text" id="editProfileName" required>
+                    <label>Full Name</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('editProfileModal')" class="btn-outline">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button onclick="closeModal('changePasswordModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="input-group">
+                    <input type="password" id="currentPassword" required>
+                    <label>Current Password</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="newPassword" required minlength="6">
+                    <label>New Password (min 6 characters)</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirmNewPassword" required>
+                    <label>Confirm New Password</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('changePasswordModal')" class="btn-outline">Cancel</button>
+                    <button type="submit" class="btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
